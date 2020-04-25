@@ -1,18 +1,16 @@
 package http
 
 import (
-	"fmt"
+	"log"
 	"net/http"
-	"os"
 )
 
-func StartHttpServer(host string, port string) {
+func StartHttpServer(host string, port string, handler http.Handler) {
 	address := host + ":" + port
-	fmt.Print("Starting server on " + address)
+	log.Println("Starting server on " + address)
 
-	err := http.ListenAndServe(address, GetRouter())
+	err := http.ListenAndServe(address, handler)
 	if nil != err {
-		fmt.Fprintf(os.Stderr, "Unable to start server: %v\n", err)
-		os.Exit(1)
+		log.Fatalf("Unable to start server: %v\n", err)
 	}
 }

@@ -1,6 +1,6 @@
 package user
 
 type Repository interface {
-	Store(user User)
-	FindById(id int) User
+	Store(user User) error
+	FindById(id int) (User, error)
 }

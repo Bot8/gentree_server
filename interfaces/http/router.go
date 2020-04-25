@@ -8,10 +8,10 @@ import (
 	"artarn/gentree/interfaces/http/handlers"
 )
 
-func GetRouter() http.Handler {
+func GetRouter(userHandler handlers.UserHandler) http.Handler {
 	router := mux.NewRouter()
 
-	router.HandleFunc("/", handlers.IndexHandler)
+	router.HandleFunc("/", userHandler.ShowUser())
 
 	return router
 }

@@ -2,14 +2,26 @@ package main
 
 import (
 	"artarn/gentree/infrastructure"
+	"artarn/gentree/infrastructure/database"
+	"artarn/gentree/interfaces/database/pg"
 	"artarn/gentree/interfaces/http"
-	"fmt"
+	"artarn/gentree/interfaces/http/handlers"
+	"artarn/gentree/usecases"
+	"log"
 )
 
 func main() {
-	fmt.Println("Hello on gentree!")
+	log.Println("Hello on gentree!")
 
-	serverConfig := infrastructure.GetConfig().Server
+	config := infrastructure.GetConfig()
 
-	http.StartHttpServer(serverConfig.Host, serverConfig.Port)
+	connection := database.GetConnection()
+
+	userRepository := pg.NewPGUserRepository(connection)
+	userInteractor := usecases.NewUserInteractor(userRepository)
+	userHandler := handlers.NewUserHandler(*userInteractor)
+
+	router := http.GetRouter(*userHandler)
+
+	http.StartHttpServer(config.Server.Host, config.Server.Port, router)
 }

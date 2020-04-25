@@ -5,11 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jmoiron/sqlx"
+	"log"
 
 	_ "github.com/jackc/pgx/stdlib"
 )
 
-func GetConnection() (*sqlx.DB, error) {
+func GetConnection() *sqlx.DB {
 	databaseConfig := infrastructure.GetConfig().Database
 	dsn := fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=disable",
 		databaseConfig.Username,
@@ -18,13 +19,17 @@ func GetConnection() (*sqlx.DB, error) {
 		databaseConfig.Port,
 		databaseConfig.Name)
 
-	fmt.Println(dsn)
-
 	connection, err := sqlx.Connect("pgx", dsn)
 
 	if err != nil {
-		err = errors.New("Cannot add unavailable items to order")
+		err = errors.New("cannot establish connection")
+		log.Fatal(err)
 	}
 
-	return connection, err
+	err = connection.Ping()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return connection
 }
