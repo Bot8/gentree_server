@@ -1,12 +1,12 @@
 package jsonrpc
 
 import (
-	"artarn/gentree/interfaces/jsonrpc/handlers"
+	"artarn/gentree/interfaces/jsonrpc/usecases"
 	"github.com/osamingo/jsonrpc"
 	"log"
 )
 
-func GetNewMethodRepository(showUser handlers.ShowUser) *jsonrpc.MethodRepository {
+func GetNewMethodRepository(showUser usecases.ShowUserUseCase) *jsonrpc.MethodRepository {
 	jsonRPCServer := jsonrpc.NewMethodRepository()
 
 	err := jsonRPCServer.RegisterMethod("User.ShowInfo", showUser.ShowUserHandler, showUser.ShowUserParams, showUser.ShowUserResult)

@@ -1,4 +1,4 @@
-package handlers
+package usecases
 
 import (
 	"artarn/gentree/usecases"
@@ -8,13 +8,13 @@ import (
 )
 
 type (
-	ShowUser struct {
+	ShowUserUseCase struct {
 		ShowUserHandler *ShowUserHandler
 		ShowUserParams  ShowUserParams
 		ShowUserResult  ShowUserResult
 	}
 	ShowUserHandler struct {
-		interactor usecases.UserInteractor
+		useCase usecases.UserUseCase
 	}
 	ShowUserParams struct{}
 	ShowUserResult struct {
@@ -24,14 +24,14 @@ type (
 )
 
 func (h ShowUserHandler) ServeJSONRPC(c context.Context, params *fastjson.RawMessage) (interface{}, *jsonrpc.Error) {
-	u, _ := h.interactor.ShowUser(1)
+	u, _ := h.useCase.ShowUser(1)
 	return ShowUserResult{
 		Id:   u.Id,
 		Name: u.Name,
 	}, nil
 }
 
-func NewShowUser(interactor usecases.UserInteractor) *ShowUser {
-	showUserHandler := &ShowUserHandler{interactor: interactor}
-	return &ShowUser{ShowUserHandler: showUserHandler}
+func NewShowUser(useCase usecases.UserUseCase) *ShowUserUseCase {
+	showUserHandler := &ShowUserHandler{useCase: useCase}
+	return &ShowUserUseCase{ShowUserHandler: showUserHandler}
 }

@@ -4,16 +4,16 @@ import (
 	"artarn/gentree/domain/user"
 )
 
-type UserInteractor struct {
+type UserUseCase struct {
 	UserRepository user.Repository
 }
 
-func (interactor *UserInteractor) ShowUser(userId int) (user.User, error) {
-	return interactor.UserRepository.FindById(userId)
+func (useCase *UserUseCase) ShowUser(userId int) (user.User, error) {
+	return useCase.UserRepository.FindById(userId)
 }
 
-func NewUserInteractor(userRepository user.Repository) *UserInteractor {
-	return &UserInteractor{
+func NewUserUseCase(userRepository user.Repository) *UserUseCase {
+	return &UserUseCase{
 		UserRepository: userRepository,
 	}
 }

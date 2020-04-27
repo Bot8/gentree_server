@@ -13,11 +13,6 @@ type Config struct {
 		Name        string `yaml:"db"`
 		Connections int    `yaml:"connections"`
 	} `yaml:"database"`
-	RestServer struct {
-		Enabled bool   `yaml:"enable"`
-		Host    string `yaml:"host"`
-		Port    string `yaml:"port"`
-	} `yaml:"rest-server"`
 	JsonRPRCServer struct {
 		Enabled bool   `yaml:"enable"`
 		Host    string `yaml:"host"`
