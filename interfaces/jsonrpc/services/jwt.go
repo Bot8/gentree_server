@@ -5,6 +5,7 @@ import (
 	"gopkg.in/square/go-jose.v2"
 	"gopkg.in/square/go-jose.v2/jwt"
 	"strconv"
+	"time"
 )
 
 type (
@@ -24,7 +25,7 @@ func (service JWTService) GetAuthToken(user *user.User) string {
 		panic(err)
 	}
 
-	claims := getClaims(user)
+	claims := makeClaims(user)
 
 	raw, err := jwt.SignedAndEncrypted(signer, encrypter).Claims(claims).CompactSerialize()
 	if err != nil {
@@ -55,6 +56,26 @@ func (service JWTService) ParseAuthToken(authToken string) (*ParsedToken, error)
 		return nil, err
 	}
 
+	err = claims.Validate(jwt.Expected{
+		Time: time.Now(),
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return makeParsedToken(claims)
+}
+
+func makeClaims(user *user.User) jwt.Claims {
+	now := time.Now()
+	return jwt.Claims{
+		Expiry:  jwt.NewNumericDate(now.Add(1 * time.Minute)),
+		Subject: strconv.Itoa(user.Id),
+	}
+}
+
+func makeParsedToken(claims jwt.Claims) (*ParsedToken, error) {
 	userId, err := strconv.Atoi(claims.Subject)
 
 	if err != nil {
@@ -62,12 +83,6 @@ func (service JWTService) ParseAuthToken(authToken string) (*ParsedToken, error)
 	}
 
 	return &ParsedToken{UserId: userId}, nil
-}
-
-func getClaims(user *user.User) jwt.Claims {
-	return jwt.Claims{
-		Subject: strconv.Itoa(user.Id),
-	}
 }
 
 func (service JWTService) getSigner() (jose.Signer, error) {
