@@ -2,6 +2,8 @@ package jsonrpc
 
 import (
 	"github.com/osamingo/jsonrpc"
+	"goji.io"
+	"goji.io/pat"
 	"log"
 	"net/http"
 )
@@ -10,10 +12,12 @@ func StartJSONRPCServer(host string, port string, handler *jsonrpc.MethodReposit
 	address := host + ":" + port
 	log.Println("Starting JSON RPC server on " + address)
 
-	http.Handle("/jrpc", handler)
-	http.HandleFunc("/jrpc/debug", handler.ServeDebug)
+	mux := goji.NewMux()
 
-	err := http.ListenAndServe(address, http.DefaultServeMux)
+	mux.Handle(pat.Post("/jrpc"), handler)
+	mux.HandleFunc(pat.Post("/jrpc/debug"), handler.ServeDebug)
+
+	err := http.ListenAndServe(address, mux)
 	if nil != err {
 		log.Fatalf("Unable to start server: %v\n", err)
 	}

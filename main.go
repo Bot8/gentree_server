@@ -5,8 +5,9 @@ import (
 	"artarn/gentree/infrastructure/database"
 	"artarn/gentree/interfaces/database/pg"
 	"artarn/gentree/interfaces/jsonrpc"
-	jsonrpcUsecases "artarn/gentree/interfaces/jsonrpc/usecases"
-	"artarn/gentree/usecases"
+	"artarn/gentree/interfaces/jsonrpc/services"
+	jsonRPCUseCases "artarn/gentree/interfaces/jsonrpc/usecases"
+	domainUseCases "artarn/gentree/usecases"
 
 	"log"
 )
@@ -19,10 +20,11 @@ func main() {
 	connection := database.GetConnection()
 
 	userRepository := pg.NewPGUserRepository(connection)
+	userUseCase := domainUseCases.NewUserUseCase(userRepository)
 
-	userUseCase := usecases.NewUserUseCase(userRepository)
+	authService := services.NewAuthService(userRepository)
 
-	showUser := jsonrpcUsecases.NewShowUser(*userUseCase)
+	showUser := jsonRPCUseCases.NewShowUser(*userUseCase, *authService)
 	methodRepository := jsonrpc.GetNewMethodRepository(*showUser)
 
 	jsonrpc.StartJSONRPCServer(config.JsonRPRCServer.Host, config.JsonRPRCServer.Port, methodRepository)

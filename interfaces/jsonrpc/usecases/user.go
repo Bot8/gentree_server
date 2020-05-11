@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"artarn/gentree/interfaces/jsonrpc/services"
 	"artarn/gentree/usecases"
 	"context"
 	"github.com/intel-go/fastjson"
@@ -14,9 +15,12 @@ type (
 		ShowUserResult  ShowUserResult
 	}
 	ShowUserHandler struct {
-		useCase usecases.UserUseCase
+		useCase     usecases.UserUseCase
+		authService services.AuthService
 	}
-	ShowUserParams struct{}
+	ShowUserParams struct {
+		services.AuthCredentials `json:"auth"`
+	}
 	ShowUserResult struct {
 		Id   int    `json:"id"`
 		Name string `json:"name"`
@@ -24,14 +28,24 @@ type (
 )
 
 func (h ShowUserHandler) ServeJSONRPC(c context.Context, params *fastjson.RawMessage) (interface{}, *jsonrpc.Error) {
-	u, _ := h.useCase.ShowUser(1)
+	var p ShowUserParams
+	if err := jsonrpc.Unmarshal(params, &p); err != nil {
+		return nil, err
+	}
+
+	u, err := h.authService.GetAuthUser(p.AuthCredentials)
+
+	if nil != err {
+		return nil, err
+	}
+
 	return ShowUserResult{
 		Id:   u.Id,
 		Name: u.Name,
 	}, nil
 }
 
-func NewShowUser(useCase usecases.UserUseCase) *ShowUserUseCase {
-	showUserHandler := &ShowUserHandler{useCase: useCase}
+func NewShowUser(useCase usecases.UserUseCase, authService services.AuthService) *ShowUserUseCase {
+	showUserHandler := &ShowUserHandler{useCase: useCase, authService: authService}
 	return &ShowUserUseCase{ShowUserHandler: showUserHandler}
 }
