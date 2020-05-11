@@ -5,6 +5,7 @@ go 1.14
 require (
 	github.com/cockroachdb/apd v1.1.0 // indirect
 	github.com/gofrs/uuid v3.2.0+incompatible // indirect
+	github.com/google/go-cmp v0.4.0 // indirect
 	github.com/ilyakaznacheev/cleanenv v1.2.2
 	github.com/intel-go/fastjson v0.0.0-20170329170629-f846ae58a1ab
 	github.com/jackc/fake v0.0.0-20150926172116-812a484cc733 // indirect
@@ -19,4 +20,5 @@ require (
 	golang.org/x/crypto v0.0.0-20200323165209-0ec3e9974c59 // indirect
 	google.golang.org/appengine v1.6.5 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
+	gopkg.in/square/go-jose.v2 v2.5.1
 )

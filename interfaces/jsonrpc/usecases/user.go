@@ -17,13 +17,15 @@ type (
 	ShowUserHandler struct {
 		useCase     usecases.UserUseCase
 		authService services.AuthService
+		jwtService  services.JWTService
 	}
 	ShowUserParams struct {
 		services.AuthCredentials `json:"auth"`
 	}
 	ShowUserResult struct {
-		Id   int    `json:"id"`
-		Name string `json:"name"`
+		Id         int                 `json:"id"`
+		Name       string              `json:"name"`
+		AuthTokens services.AuthTokens `json:"auth_tokens"`
 	}
 )
 
@@ -39,13 +41,18 @@ func (h ShowUserHandler) ServeJSONRPC(c context.Context, params *fastjson.RawMes
 		return nil, err
 	}
 
+	authTokens := services.AuthTokens{
+		AuthToken: h.jwtService.GetAuthToken(u),
+	}
+
 	return ShowUserResult{
-		Id:   u.Id,
-		Name: u.Name,
+		Id:         u.Id,
+		Name:       u.Name,
+		AuthTokens: authTokens,
 	}, nil
 }
 
-func NewShowUser(useCase usecases.UserUseCase, authService services.AuthService) *ShowUserUseCase {
-	showUserHandler := &ShowUserHandler{useCase: useCase, authService: authService}
+func NewShowUser(useCase *usecases.UserUseCase, authService *services.AuthService, jwtService *services.JWTService) *ShowUserUseCase {
+	showUserHandler := &ShowUserHandler{useCase: *useCase, authService: *authService, jwtService: *jwtService}
 	return &ShowUserUseCase{ShowUserHandler: showUserHandler}
 }

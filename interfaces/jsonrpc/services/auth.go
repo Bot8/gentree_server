@@ -15,19 +15,32 @@ const (
 
 type (
 	AuthCredentials struct {
-		Key int `json:"key"`
+		Key string `json:"key"`
+	}
+	AuthTokens struct {
+		AuthToken      string `json:"auth"`
+		RefreshToken   string `json:"refresh"`
+		SignerToken    string `json:"signer_token"`
+		EncryptedToken string `json:"encrypted_token"`
 	}
 	AuthService struct {
 		userRepository user.Repository
+		JWTService
 	}
 )
 
 func (service AuthService) GetAuthUser(credentials AuthCredentials) (*user.User, *jsonrpc.Error) {
-	if 0 == credentials.Key {
+	if "" == credentials.Key {
 		return nil, ErrMissingAuthCredentials()
 	}
 
-	u, err := service.userRepository.FindById(credentials.Key)
+	parsedToken, err := service.JWTService.ParseAuthToken(credentials.Key)
+
+	if nil != err {
+		return nil, ErrInvalidAuthCredentials()
+	}
+
+	u, err := service.userRepository.FindById(parsedToken.UserId)
 
 	if nil != err {
 		return nil, ErrInvalidAuthCredentials()
@@ -36,8 +49,8 @@ func (service AuthService) GetAuthUser(credentials AuthCredentials) (*user.User,
 	return &u, nil
 }
 
-func NewAuthService(repository user.Repository) *AuthService {
-	return &AuthService{userRepository: repository}
+func NewAuthService(repository user.Repository, jwtService JWTService) *AuthService {
+	return &AuthService{userRepository: repository, JWTService: jwtService}
 }
 
 func ErrMissingAuthCredentials() *jsonrpc.Error {
