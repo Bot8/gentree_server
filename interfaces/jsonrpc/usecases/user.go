@@ -53,6 +53,7 @@ func (h ShowUserHandler) ServeJSONRPC(c context.Context, params *fastjson.RawMes
 }
 
 func NewShowUser(useCase *usecases.UserUseCase, authService *services.AuthService, jwtService *services.JWTService) *ShowUserUseCase {
-	showUserHandler := &ShowUserHandler{useCase: *useCase, authService: *authService, jwtService: *jwtService}
-	return &ShowUserUseCase{ShowUserHandler: showUserHandler}
+	return &ShowUserUseCase{
+		ShowUserHandler: &ShowUserHandler{useCase: *useCase, authService: *authService, jwtService: *jwtService},
+	}
 }

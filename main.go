@@ -27,7 +27,8 @@ func main() {
 	authService := services.NewAuthService(userRepository, *jwtService)
 
 	showUser := jsonRPCUseCases.NewShowUser(userUseCase, authService, jwtService)
-	methodRepository := jsonrpc.GetNewMethodRepository(*showUser)
+	login := jsonRPCUseCases.NewLoginUseCase(authService, jwtService)
+	methodRepository := jsonrpc.GetNewMethodRepository(*showUser, *login)
 
 	jsonrpc.StartJSONRPCServer(config.JsonRPRCServer.Host, config.JsonRPRCServer.Port, methodRepository)
 }

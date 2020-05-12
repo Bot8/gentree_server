@@ -21,7 +21,14 @@ func (p pgUserRepository) Store(user user.User) error {
 
 func (p pgUserRepository) FindById(id int) (user.User, error) {
 	var u user.User
-	err := p.DB.Get(&u, "select id, name from general.users where id  = $1", id)
+	err := p.DB.Get(&u, "select id, name, login, password from general.users where id  = $1", id)
+
+	return u, err
+}
+
+func (p pgUserRepository) FindByLogin(login string) (user.User, error) {
+	var u user.User
+	err := p.DB.Get(&u, "select id, name, login, password from general.users where login  = $1", login)
 
 	return u, err
 }

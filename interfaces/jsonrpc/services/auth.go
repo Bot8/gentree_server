@@ -2,6 +2,8 @@ package services
 
 import (
 	"artarn/gentree/domain/user"
+	"crypto/sha256"
+	"fmt"
 	"github.com/osamingo/jsonrpc"
 )
 
@@ -11,6 +13,9 @@ const (
 
 	ErrorCodeInvalidAuthCredentials    jsonrpc.ErrorCode = -4002
 	ErrorMessageInvalidAuthCredentials string            = "Invalid auth credentials"
+
+	ErrorCodeUserNotFound    jsonrpc.ErrorCode = -4003
+	ErrorMessageUserNotFound string            = "User not found"
 )
 
 type (
@@ -18,10 +23,7 @@ type (
 		Key string `json:"key"`
 	}
 	AuthTokens struct {
-		AuthToken      string `json:"auth"`
-		RefreshToken   string `json:"refresh"`
-		SignerToken    string `json:"signer_token"`
-		EncryptedToken string `json:"encrypted_token"`
+		AuthToken string `json:"auth"`
 	}
 	AuthService struct {
 		userRepository user.Repository
@@ -49,6 +51,25 @@ func (service AuthService) GetAuthUser(credentials AuthCredentials) (*user.User,
 	return &u, nil
 }
 
+func (service AuthService) Login(login string, password string) (*user.User, *jsonrpc.Error) {
+	u, err := service.userRepository.FindByLogin(login)
+
+	if nil != err {
+		return nil, ErrUserNotFound()
+	}
+
+	if false == validatePassword(&u, password) {
+		return nil, ErrUserNotFound()
+	}
+
+	return &u, nil
+}
+
+func validatePassword(user *user.User, password string) bool {
+	encodedPassword := fmt.Sprintf("%x", sha256.Sum256([]byte(password)))
+	return encodedPassword == user.Password
+}
+
 func NewAuthService(repository user.Repository, jwtService JWTService) *AuthService {
 	return &AuthService{userRepository: repository, JWTService: jwtService}
 }
@@ -64,5 +85,12 @@ func ErrInvalidAuthCredentials() *jsonrpc.Error {
 	return &jsonrpc.Error{
 		Code:    ErrorCodeInvalidAuthCredentials,
 		Message: ErrorMessageInvalidAuthCredentials,
+	}
+}
+
+func ErrUserNotFound() *jsonrpc.Error {
+	return &jsonrpc.Error{
+		Code:    ErrorCodeUserNotFound,
+		Message: ErrorMessageUserNotFound,
 	}
 }
