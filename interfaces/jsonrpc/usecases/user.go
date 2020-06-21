@@ -23,13 +23,13 @@ type (
 		services.AuthCredentials `json:"auth"`
 	}
 	ShowUserResult struct {
-		Id         int                 `json:"id"`
-		Name       string              `json:"name"`
-		AuthTokens services.AuthTokens `json:"auth_tokens"`
+		Id              int                      `json:"id"`
+		Name            string                   `json:"name"`
+		AuthCredentials services.AuthCredentials `json:"auth"`
 	}
 )
 
-func (h ShowUserHandler) ServeJSONRPC(c context.Context, params *fastjson.RawMessage) (interface{}, *jsonrpc.Error) {
+func (h ShowUserHandler) ServeJSONRPC(_ context.Context, params *fastjson.RawMessage) (interface{}, *jsonrpc.Error) {
 	var p ShowUserParams
 	if err := jsonrpc.Unmarshal(params, &p); err != nil {
 		return nil, err
@@ -41,14 +41,14 @@ func (h ShowUserHandler) ServeJSONRPC(c context.Context, params *fastjson.RawMes
 		return nil, err
 	}
 
-	authTokens := services.AuthTokens{
+	authCredentials := services.AuthCredentials{
 		AuthToken: h.jwtService.GetAuthToken(u),
 	}
 
 	return ShowUserResult{
-		Id:         u.Id,
-		Name:       u.Name,
-		AuthTokens: authTokens,
+		Id:              u.Id,
+		Name:            u.Name,
+		AuthCredentials: authCredentials,
 	}, nil
 }
 

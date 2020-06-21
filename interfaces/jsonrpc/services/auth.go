@@ -20,10 +20,7 @@ const (
 
 type (
 	AuthCredentials struct {
-		Key string `json:"key"`
-	}
-	AuthTokens struct {
-		AuthToken string `json:"auth"`
+		AuthToken string `json:"auth_token"`
 	}
 	AuthService struct {
 		userRepository user.Repository
@@ -32,11 +29,11 @@ type (
 )
 
 func (service AuthService) GetAuthUser(credentials AuthCredentials) (*user.User, *jsonrpc.Error) {
-	if "" == credentials.Key {
+	if "" == credentials.AuthToken {
 		return nil, ErrMissingAuthCredentials()
 	}
 
-	parsedToken, err := service.JWTService.ParseAuthToken(credentials.Key)
+	parsedToken, err := service.JWTService.ParseAuthToken(credentials.AuthToken)
 
 	if nil != err {
 		return nil, ErrInvalidAuthCredentials()
