@@ -1,4 +1,4 @@
-package jsonrpc
+package jsonRpcInterface
 
 import (
 	"github.com/osamingo/jsonrpc"

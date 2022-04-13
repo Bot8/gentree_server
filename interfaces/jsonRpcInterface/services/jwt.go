@@ -17,6 +17,10 @@ type (
 	}
 )
 
+func CreateJWTService(encryptionKey string) *JWTService {
+	return &JWTService{encryptionKey: []byte(encryptionKey)}
+}
+
 func (service JWTService) GetAuthToken(user *user.User) string {
 	signer, err := service.getSigner()
 	encrypter, err := service.getEncrypter()
@@ -68,9 +72,9 @@ func (service JWTService) ParseAuthToken(authToken string) (*ParsedToken, error)
 }
 
 func makeClaims(user *user.User) jwt.Claims {
-	now := time.Now()
+	//now := time.Now()
 	return jwt.Claims{
-		Expiry:  jwt.NewNumericDate(now.Add(1 * time.Minute)),
+		//Expiry:  jwt.NewNumericDate(now.Add(1 * time.Minute)),
 		Subject: strconv.Itoa(user.Id),
 	}
 }
@@ -100,8 +104,4 @@ func (service JWTService) getEncrypter() (jose.Encrypter, error) {
 	}
 	encrypterOptions := (&jose.EncrypterOptions{}).WithType("JWT").WithContentType("JWT")
 	return jose.NewEncrypter(encryption, recipient, encrypterOptions)
-}
-
-func NewJWTService(encryptionKey string) *JWTService {
-	return &JWTService{encryptionKey: []byte(encryptionKey)}
 }

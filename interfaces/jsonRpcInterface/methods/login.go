@@ -1,14 +1,17 @@
-package usecases
+package methods
 
 import (
-	"artarn/gentree/interfaces/jsonrpc/services"
+	"artarn/gentree/interfaces/jsonRpcInterface/services"
 	"context"
 	"github.com/intel-go/fastjson"
 	"github.com/osamingo/jsonrpc"
 )
 
 type (
-	LoginUseCase struct {
+	AuthParams struct {
+		services.AuthCredentials `json:"auth"`
+	}
+	LoginMethod struct {
 		LoginHandler *LoginHandler
 		LoginParams  LoginParams
 		LoginResult  LoginResult
@@ -27,6 +30,12 @@ type (
 		AuthCredentials services.AuthCredentials `json:"auth"`
 	}
 )
+
+func CreateLoginMethod(authService *services.AuthService, jwtService *services.JWTService) *LoginMethod {
+	return &LoginMethod{
+		LoginHandler: &LoginHandler{authService: *authService, jwtService: *jwtService},
+	}
+}
 
 func (h LoginHandler) ServeJSONRPC(_ context.Context, params *fastjson.RawMessage) (interface{}, *jsonrpc.Error) {
 	var p LoginParams
@@ -49,10 +58,4 @@ func (h LoginHandler) ServeJSONRPC(_ context.Context, params *fastjson.RawMessag
 		Name:            u.Name,
 		AuthCredentials: authCredentials,
 	}, nil
-}
-
-func NewLoginUseCase(authService *services.AuthService, jwtService *services.JWTService) *LoginUseCase {
-	return &LoginUseCase{
-		LoginHandler: &LoginHandler{authService: *authService, jwtService: *jwtService},
-	}
 }

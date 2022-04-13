@@ -1,13 +1,12 @@
 package main
 
 import (
+	"artarn/gentree/dataAccess/pg"
 	"artarn/gentree/infrastructure"
 	"artarn/gentree/infrastructure/database"
-	"artarn/gentree/interfaces/database/pg"
-	"artarn/gentree/interfaces/jsonrpc"
-	"artarn/gentree/interfaces/jsonrpc/services"
-	jsonRPCUseCases "artarn/gentree/interfaces/jsonrpc/usecases"
-	domainUseCases "artarn/gentree/usecases"
+	"artarn/gentree/interfaces/jsonRpcInterface"
+	"artarn/gentree/interfaces/jsonRpcInterface/methods"
+	"artarn/gentree/interfaces/jsonRpcInterface/services"
 
 	"log"
 )
@@ -18,17 +17,14 @@ func main() {
 	config := infrastructure.GetConfig()
 
 	connection := database.GetConnection()
+	userRepository := pg.CreateUserRepository(connection)
 
-	jwtService := services.NewJWTService(config.Encryption.JWTSecret)
+	jwtService := services.CreateJWTService(config.Encryption.JWTSecret)
+	authService := services.CreateAuthService(userRepository, *jwtService)
 
-	userRepository := pg.NewPGUserRepository(connection)
-	userUseCase := domainUseCases.NewUserUseCase(userRepository)
+	showUserMethod := methods.CreateShowUserMethod(authService)
+	loginMethod := methods.CreateLoginMethod(authService, jwtService)
 
-	authService := services.NewAuthService(userRepository, *jwtService)
-
-	showUser := jsonRPCUseCases.NewShowUser(userUseCase, authService, jwtService)
-	login := jsonRPCUseCases.NewLoginUseCase(authService, jwtService)
-	methodRepository := jsonrpc.GetNewMethodRepository(*showUser, *login)
-
-	jsonrpc.StartJSONRPCServer(config.JsonRPRCServer.Host, config.JsonRPRCServer.Port, methodRepository)
+	methodRepository := jsonRpcInterface.GetNewMethodRepository(*showUserMethod, *loginMethod)
+	jsonRpcInterface.StartJSONRPCServer(config.JsonRPRCServer.Host, config.JsonRPRCServer.Port, methodRepository)
 }

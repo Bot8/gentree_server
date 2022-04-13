@@ -9,7 +9,7 @@ type pgUserRepository struct {
 	DB *sqlx.DB
 }
 
-func NewPGUserRepository(connection *sqlx.DB) user.Repository {
+func CreateUserRepository(connection *sqlx.DB) user.Repository {
 	return &pgUserRepository{
 		DB: connection,
 	}

@@ -28,6 +28,10 @@ type (
 	}
 )
 
+func CreateAuthService(repository user.Repository, jwtService JWTService) *AuthService {
+	return &AuthService{userRepository: repository, JWTService: jwtService}
+}
+
 func (service AuthService) GetAuthUser(credentials AuthCredentials) (*user.User, *jsonrpc.Error) {
 	if "" == credentials.AuthToken {
 		return nil, ErrMissingAuthCredentials()
@@ -56,7 +60,7 @@ func (service AuthService) Login(login string, password string) (*user.User, *js
 	}
 
 	if false == validatePassword(&u, password) {
-		return nil, ErrUserNotFound()
+		return nil, ErrInvalidAuthCredentials()
 	}
 
 	return &u, nil
@@ -65,10 +69,6 @@ func (service AuthService) Login(login string, password string) (*user.User, *js
 func validatePassword(user *user.User, password string) bool {
 	encodedPassword := fmt.Sprintf("%x", sha256.Sum256([]byte(password)))
 	return encodedPassword == user.Password
-}
-
-func NewAuthService(repository user.Repository, jwtService JWTService) *AuthService {
-	return &AuthService{userRepository: repository, JWTService: jwtService}
 }
 
 func ErrMissingAuthCredentials() *jsonrpc.Error {
